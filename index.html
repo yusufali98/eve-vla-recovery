@@ -227,8 +227,8 @@
               <i>Generator-Agnostic</i> verifiers operate only on sensor observations and select from predefined
               recovery action primitives (the <i>Primitive</i> steerer). <i>Generator-Conditioned</i> verifiers
               additionally consume a representation of the candidate trajectories and select among them (the
-              <i>Pivot</i> steerer, built on PIVOT-style prompting). An aggregation operator fuses the verifier
-              outputs into a common trajectory representation.
+              <i>Pivot</i> steerer, built on PIVOT-style prompting). Verifier outputs are aggregated into a common
+              trajectory representation using a weighted average.
             </li>
             <li>
               <b>Action Incorporator.</b> Instead of overriding or naively averaging actions, EVE uses a guided
@@ -252,37 +252,6 @@
       </div>
     </div>
     <!--/ Approach. -->
-
-    <!-- Key Contributions. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h3 class="title is-4">Key Contributions</h3>
-        <div class="content has-text-justified">
-          <ul>
-            <li>
-              A <b>generator-verifier system</b> tailored for embodied policies, where verifiers operate with
-              different input modalities, capabilities, and action spaces to improve test-time performance.
-            </li>
-            <li>
-              An <b>action incorporator</b> module that employs guided diffusion to fuse aggregated verifier
-              outputs with base policy action predictions.
-            </li>
-            <li>
-              Zero-shot EVE ensembles <b>outperform state-of-the-art embodied verifier baselines</b> trained
-              with substantial in-domain data on SimplerEnv (7 tasks, 2 embodiments), and extend to
-              long-horizon mobile manipulation (ManiSkill-HAB), bimanual tabletop manipulation (RoboTwin), and
-              a real-world Franka manipulator.
-            </li>
-            <li>
-              Analysis of how EVE's ensemble <b>recovers failed rollouts</b> and how verifier ensembles
-              outperform individual verifiers, with extensive ablations of the design choices in building
-              effective generator-verifier systems.
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!--/ Key Contributions. -->
   </div>
 </section>
 
