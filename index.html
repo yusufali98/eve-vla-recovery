@@ -10,6 +10,8 @@
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
         rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap"
+        rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
   <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
@@ -53,6 +55,7 @@
     .pos { color: #1a7f37; font-weight: 600; }
     .neg { color: #cf222e; font-weight: 600; }
     .table-caption { font-size: 0.9rem; color: #555; margin-top: 0.75rem; }
+    .eve-mono { font-family: 'Roboto Mono', monospace; font-weight: 500; }
   </style>
 </head>
 <body>
@@ -523,6 +526,41 @@
     </div>
   </div>
 </footer>
+
+<script>
+  // Render every standalone "EVE" wordmark in Roboto Mono (monospace), matching
+  // the \texttt{EVE} styling used in the paper.
+  document.addEventListener('DOMContentLoaded', function () {
+    var SKIP = { SCRIPT: 1, STYLE: 1, PRE: 1, CODE: 1, TEXTAREA: 1 };
+    function walk(node) {
+      var child = node.firstChild;
+      while (child) {
+        var next = child.nextSibling;
+        if (child.nodeType === 3) {
+          if (/\bEVE\b/.test(child.nodeValue)) {
+            var frag = document.createDocumentFragment();
+            child.nodeValue.split(/(\bEVE\b)/g).forEach(function (part) {
+              if (part === 'EVE') {
+                var span = document.createElement('span');
+                span.className = 'eve-mono';
+                span.textContent = 'EVE';
+                frag.appendChild(span);
+              } else if (part) {
+                frag.appendChild(document.createTextNode(part));
+              }
+            });
+            node.replaceChild(frag, child);
+          }
+        } else if (child.nodeType === 1 && !SKIP[child.tagName] &&
+                   !child.classList.contains('eve-mono')) {
+          walk(child);
+        }
+        child = next;
+      }
+    }
+    walk(document.body);
+  });
+</script>
 
 </body>
 </html>
