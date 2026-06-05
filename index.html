@@ -185,7 +185,7 @@
   <div class="container is-max-desktop">
     <!-- Abstract. -->
     <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
+      <div class="column is-four-fifths" style="flex: none; width: 85%;">
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
@@ -228,17 +228,17 @@
             (<b>E</b>mbodied <b>V</b>erifier <b>E</b>nsembles) leverages frozen, frontier vision-language
             models (VLMs) as zero-shot verifiers in a unified generator-verifier architecture. At each
             intervention point, EVE queries multiple verifiers with distinct action-feedback strategies and
-            fuses their corrections into the base policy through a classifier-guidance-based action
+            fuses their corrections into the base VLA through a classifier-guidance-based action
             incorporator. The framework is organized around four components:
           </p>
           <ul style="text-align: left;">
             <li>
               <b>Base Policy Candidate Generation.</b> Given an instruction, observation, and proprioceptive
-              state, the frozen base policy samples <i>K</i> diverse candidate action trajectories by denoising
+              state, the base VLA samples <i>K</i> diverse candidate action trajectories by denoising
               from independent noise samples.
             </li>
             <li>
-              <b>Verifier Agents.</b> A collection of verifier modules each provide structured action feedback.
+              <b>Verifier Agents.</b> A collection of verifier modules each provide structured and dsitinct action feedback.
               <i>Generator-Agnostic</i> verifiers operate only on sensor observations and select from predefined
               recovery action primitives (the <i>Primitive</i> steerer). <i>Generator-Conditioned</i> verifiers
               additionally consume a representation of the candidate trajectories and select among them (the
@@ -248,7 +248,7 @@
             <li>
               <b>Action Incorporator.</b> Instead of overriding or naively averaging actions, EVE uses a guided
               diffusion process that steers denoising toward verifier-consistent behavior while preserving the
-              base policy's learned action prior. A guidance coefficient controls how much verifier feedback is
+              base VLA's learned action prior. A guidance coefficient controls how much verifier feedback is
               injected at each reverse-diffusion step.
             </li>
             <li>
@@ -259,8 +259,8 @@
             </li>
           </ul>
           <p>
-            The result is an inference-time action refinement algorithm that produces semantically grounded
-            recovery feedback and interpolates it with the base policy distribution &mdash; requiring no finetuning
+            The result is an <i>inference-time action refinement</i> algorithm that produces semantically grounded
+            recovery feedback and interpolates it with the base VLA actiondistribution &mdash; requiring no finetuning
             of policy weights.
           </p>
         </div>
