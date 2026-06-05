@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="EVE: A modular generator-verifier system that boosts pretrained generative robot policies at test time using zero-shot VLM-based verifier ensembles, with no additional training.">
+  <meta name="keywords" content="VLA, Test-Time Compute, Generator-Verifier, VLM, Diffusion Policy, Robot Manipulation, Recovery">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EVE: A Generator-Verifier System for Generative Policies</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <style>
+    .eve-table-wrapper { overflow-x: auto; }
+    table.eve-table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    table.eve-table th, table.eve-table td {
+      border: 1px solid #dbdbdb;
+      padding: 6px 12px;
+      text-align: center;
+    }
+    table.eve-table th { background-color: #1f4e79; color: #fff; }
+    table.eve-table td.task { text-align: left; }
+    table.eve-table tr.group td {
+      background-color: #ebf5ff;
+      font-weight: bold;
+      text-align: left;
+    }
+    table.eve-table tr.avg td { background-color: #f5f7fa; font-weight: 600; }
+    table.eve-table .best { font-weight: bold; }
+    table.eve-table .second { text-decoration: underline; }
+    .budget-zero { background-color: #dcffdc; font-weight: bold; }
+    .budget-low { background-color: #ffe6e6; }
+    .budget-high { background-color: #ffb4b4; }
+    .pos { color: #1a7f37; font-weight: 600; }
+    .neg { color: #cf222e; font-weight: 600; }
+    .table-caption { font-size: 0.9rem; color: #555; margin-top: 0.75rem; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="#">
+        <span class="icon">
+          <i class="fas fa-home"></i>
+        </span>
+      </a>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://findingdory-benchmark.github.io/">
+            FindingDory
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">EVE: A Generator-Verifier System for Generative Policies</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://yusufali98.github.io/">Yusuf Ali</a><sup>*1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.linkedin.com/in/gryphon-patlin-123814198/">Gryphon Patlin</a><sup>*1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.linkedin.com/in/karthik-kothuri/">Karthik Kothuri</a><sup>&dagger;1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.jeremiahcoholich.com/">Jeremiah Coholich</a><sup>&dagger;1</sup>,</span>
+            <span class="author-block">
+              <a href="https://zubairirshad.com/">Muhammad Zubair Irshad</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://openreview.net/profile?id=~Wuwei_Liang1">Wuwei Liang</a><sup>3</sup>,</span>
+            <span class="author-block">
+              <a href="https://faculty.cc.gatech.edu/~zk15/">Zsolt Kira</a><sup>1</sup></span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Georgia Institute of Technology,</span>
+            <span class="author-block"><sup>2</sup>Toyota Research Institute,</span>
+            <span class="author-block"><sup>3</sup>Symbotic Inc.</span>
+          </div>
+
+          <div class="is-size-7 publication-authors" style="margin-top: 0.5rem;">
+            <span class="author-block"><sup>*</sup>Co-first authors. &nbsp; <sup>&dagger;</sup>Co-second authors.</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- arXiv Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2512.21430"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/pdf/2512.21430"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <!-- Method/Teaser image. -->
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <div class="publication-image">
+        <img src="./static/media/eve/method.png"
+             alt="EVE generator-verifier framework overview"
+             style="width: 100%; height: auto;">
+      </div>
+      <p class="table-caption">
+        <b>EVE</b>: A generator-verifier interaction framework for generative embodied policies. Action
+        feedback from an ensemble of zero-shot VLM-based verifier agents is incorporated into base-policy
+        denoising through guided diffusion.
+      </p>
+    </div>
+  </div>
+
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Visuomotor policies based on generative models such as diffusion and flow-matching have shown
+            strong performance for robotics applications but degrade under distribution shifts, demonstrating
+            limited recovery capabilities without costly finetuning. In the language modeling domain,
+            test-time compute scaling has revolutionized the reasoning capabilities of modern LLMs by enabling
+            candidate solution refinement. These methods typically leverage foundation models as verification
+            modules in a zero-shot manner to score candidate solutions. We hypothesize that generative policies
+            can similarly benefit from additional inference-time compute that employs zero-shot VLM-based
+            verifiers in a generation-verification framework. To this end, we introduce <b>EVE</b>: a modular,
+            generator-verifier interaction framework that boosts the performance of pretrained generative
+            policies at test time, with <b>no additional training</b>. EVE wraps a frozen base policy with
+            multiple zero-shot, VLM-based verifier agents. Each verifier proposes action refinements to the
+            base policy candidate actions, while an action incorporator uses classifier guidance to fuse
+            aggregated verifier feedback into action denoising. We study design choices for generator&ndash;verifier
+            information interfacing across a system of verifiers with distinct capabilities. Across diverse
+            simulated and real robotic tasks and embodiments, EVE consistently improves success rates without
+            additional policy or verifier training. Through extensive ablations, we isolate the contribution of
+            verifier capabilities and action incorporator strategies, offering practical guidelines to build
+            scalable, modular generator-verifier systems for embodied control.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Approach. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Approach</h2>
+        <div class="content has-text-justified">
+          <p>
+            Rather than finetuning or retraining a base policy with expensive in-domain recovery data, EVE
+            (<b>E</b>mbodied <b>V</b>erifier <b>E</b>nsembles) leverages frozen, frontier vision-language
+            models (VLMs) as zero-shot verifiers in a unified generator-verifier architecture. At each
+            intervention point, EVE queries multiple verifiers with distinct action-feedback strategies and
+            fuses their corrections into the base policy through a classifier-guidance-based action
+            incorporator. The framework is organized around four components:
+          </p>
+          <ul style="text-align: left;">
+            <li>
+              <b>Base Policy Candidate Generation.</b> Given an instruction, observation, and proprioceptive
+              state, the frozen base policy samples <i>K</i> diverse candidate action trajectories by denoising
+              from independent noise samples.
+            </li>
+            <li>
+              <b>Verifier Agents.</b> A collection of verifier modules each provide structured action feedback.
+              <i>Generator-Agnostic</i> verifiers operate only on sensor observations and select from predefined
+              recovery action primitives (the <i>Primitive</i> steerer). <i>Generator-Conditioned</i> verifiers
+              additionally consume a representation of the candidate trajectories and select among them (the
+              <i>Pivot</i> steerer, built on PIVOT-style prompting). An aggregation operator fuses the verifier
+              outputs into a common trajectory representation.
+            </li>
+            <li>
+              <b>Action Incorporator.</b> Instead of overriding or naively averaging actions, EVE uses a guided
+              diffusion process that steers denoising toward verifier-consistent behavior while preserving the
+              base policy's learned action prior. A guidance coefficient controls how much verifier feedback is
+              injected at each reverse-diffusion step.
+            </li>
+            <li>
+              <b>Intervention Detection.</b> To avoid costly VLM calls at every step, EVE invokes verifiers only
+              at automatically detected intervention points &mdash; whenever the cumulative Maximum Mean Discrepancy
+              (MMD) of the sampled action distribution exceeds a threshold, flagging erratic or out-of-distribution
+              behavior.
+            </li>
+          </ul>
+          <p>
+            The result is an inference-time action refinement algorithm that produces semantically grounded
+            recovery feedback and interpolates it with the base policy distribution &mdash; requiring no finetuning
+            of policy weights.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Approach. -->
+
+    <!-- Key Contributions. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h3 class="title is-4">Key Contributions</h3>
+        <div class="content has-text-justified">
+          <ul>
+            <li>
+              A <b>generator-verifier system</b> tailored for embodied policies, where verifiers operate with
+              different input modalities, capabilities, and action spaces to improve test-time performance.
+            </li>
+            <li>
+              An <b>action incorporator</b> module that employs guided diffusion to fuse aggregated verifier
+              outputs with base policy action predictions.
+            </li>
+            <li>
+              Zero-shot EVE ensembles <b>outperform state-of-the-art embodied verifier baselines</b> trained
+              with substantial in-domain data on SimplerEnv (7 tasks, 2 embodiments), and extend to
+              long-horizon mobile manipulation (ManiSkill-HAB), bimanual tabletop manipulation (RoboTwin), and
+              a real-world Franka manipulator.
+            </li>
+            <li>
+              Analysis of how EVE's ensemble <b>recovers failed rollouts</b> and how verifier ensembles
+              outperform individual verifiers, with extensive ablations of the design choices in building
+              effective generator-verifier systems.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!--/ Key Contributions. -->
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <!-- Results. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Results</h2>
+      </div>
+    </div>
+
+    <!-- SimplerEnv Main Results. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h3 class="title is-4">Performance on SimplerEnv</h3>
+        <div class="content has-text-justified">
+          <p>
+            On the SimplerEnv real-to-sim benchmark, EVE with training-free, zero-shot verifiers
+            <b>outperforms state-of-the-art finetuned verifiers</b>. EVE-Ensemble attains the best total
+            average success rate of <b>72.2</b>, improving over the base policy &pi;<sub>0</sub> (67.1) and
+            over trained-verifier baselines RoboMonkey (68.1, trained on 20M synthetic preferences) and V-GPS
+            (27.3, trained on 175K demos) &mdash; while using <b>zero training data</b>. The largest gains
+            concentrate on harder, lower-success tasks such as <i>Put Apple in Drawer</i>
+            (29.9 &rarr; 40.3) and <i>Stack Blocks</i> (56.2 &rarr; 63.2).
+          </p>
+        </div>
+        <div class="publication-image">
+          <img src="./static/media/eve/eve_main_table.png"
+               alt="SimplerEnv main results table"
+               style="width: 100%; height: auto; background-color: white;">
+        </div>
+        <p class="table-caption">
+          EVE with training-free, zero-shot verifiers outperforms state-of-the-art finetuned verifiers on
+          SimplerEnv. <b>Bold</b> is best, <u>underline</u> is second-best.
+        </p>
+      </div>
+    </div>
+    <!--/ SimplerEnv Main Results. -->
+
+    <!-- Complex Tasks. -->
+    <div class="columns is-centered has-text-centered" style="margin-top: 2rem;">
+      <div class="column is-full">
+        <h3 class="title is-4">Generalization to Long-Horizon & Bimanual Tasks</h3>
+        <div class="content has-text-justified">
+          <p>
+            EVE generalizes to new embodiments and longer-horizon tasks where trained-verifier baselines
+            (RoboMonkey, V-GPS) are <b>not applicable</b>, since they require extensive in-domain training. On
+            the <b>ManiSkill-HAB</b> long-horizon mobile manipulation suite (mean over 1008 rollouts), EVE
+            consistently improves a base diffusion policy. On <b>RoboTwin 2.0</b> with an Aloha AgileX dual-arm
+            embodiment, EVE improves the &pi;<sub>0.5</sub> VLA.
+          </p>
+        </div>
+        <div class="publication-image">
+          <img src="./static/media/eve/eve_ood.png"
+               alt="ManiSkill-HAB and RoboTwin 2.0 results tables"
+               style="width: 100%; height: auto; background-color: white;">
+        </div>
+        <p class="table-caption">
+          (a) ManiSkill-HAB mobile manipulation. &nbsp; (b) RoboTwin 2.0 bimanual manipulation
+          (&pi;<sub>0.5</sub> VLA).
+        </p>
+      </div>
+    </div>
+    <!--/ Complex Tasks. -->
+
+    <!-- Real World. -->
+    <div class="columns is-centered has-text-centered" style="margin-top: 2rem;">
+      <div class="column is-full">
+        <h3 class="title is-4">Real-World Robot Experiments</h3>
+        <div class="content has-text-justified">
+          <p>
+            We validate EVE on a real Franka Emika Panda arm. We finetune the &pi;<sub>0.5</sub> VLA on 50
+            demonstrations of placing two blocks into a bin, and evaluate on 5 tasks (10 trials each): 1
+            in-distribution task, 2 OOD-Prompt tasks (pick blocks in a specific order), and 1 OOD-Object task
+            (pick coffee pod). EVE matches RoboMonkey in-distribution and <b>achieves the best performance
+            across all OOD settings</b> via semantically-informed verifier-guided corrections, while
+            RoboMonkey degrades sharply in the OOD-Prompt setting.
+          </p>
+        </div>
+        <div class="columns is-centered is-vcentered">
+          <div class="column is-half">
+            <div class="publication-image">
+              <img src="./static/media/eve/real_world_results.png"
+                   alt="Real-world success rates across training and OOD tasks"
+                   style="width: 100%; height: auto; background-color: white;">
+            </div>
+            <p class="table-caption">Success rate (out of 10 trials) on the real Franka robot.</p>
+          </div>
+          <div class="column is-half">
+            <div class="publication-image">
+              <img src="./static/media/eve/real_world_figs.png"
+                   alt="Sample real-world rollouts with EVE recovery feedback"
+                   style="width: 100%; height: auto; background-color: white;">
+            </div>
+            <p class="table-caption">
+              Sample rollouts: verifier intervention and base VLA rollout continuation <i>after</i> EVE
+              intervention.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/ Real World. -->
+
+    <!-- Latency. -->
+    <div class="columns is-centered has-text-centered" style="margin-top: 2rem;">
+      <div class="column is-four-fifths">
+        <h3 class="title is-4">Latency Analysis</h3>
+        <div class="content has-text-justified">
+          <p>
+            EVE with a smaller <i>but newer</i> Qwen3-VL-8B backbone still outperforms RoboMonkey, suggesting
+            gains scale with stronger VLM backbones. Although EVE has higher <i>per-step</i> latency, its MMD
+            trigger invokes the verifier only when the action distribution deviates significantly &mdash; and it
+            verifies at the action-chunk level &mdash; yielding a <b>lower average rollout time</b> than
+            RoboMonkey, which scores actions at every timestep.
+          </p>
+        </div>
+        <div class="publication-image">
+          <img src="./static/media/eve/eve_latency.png"
+               alt="Latency analysis table"
+               style="max-width: 70%; height: auto; background-color: white;">
+        </div>
+        <p class="table-caption">
+          EVE with smaller but newer VLM verifier backbones outperforms RoboMonkey on SimplerEnv, with a lower
+          average rollout time despite higher per-step latency.
+        </p>
+      </div>
+    </div>
+    <!--/ Latency. -->
+
+    <!-- Ablations. -->
+    <div class="columns is-centered has-text-centered" style="margin-top: 2rem;">
+      <div class="column is-full">
+        <h3 class="title is-4">Ablations</h3>
+        <div class="content has-text-justified">
+          <p>
+            We ablate the core components of EVE on the <i>SetTable-Place</i> task from ManiSkill-HAB, reporting
+            the <b>delta in success rate (%)</b> between steered and unsteered runs. (a) <b>Verifier model
+            scaling</b>: larger VLM verifiers steer more effectively, with Qwen-2.5-VL-72B consistently beating
+            7B and 32B. (b) <b>Action incorporator design</b>: guided diffusion outperforms both verifier
+            override and naive averaging, integrating just enough verifier feedback to prevent failure while
+            staying near the base policy's action distribution. (c) <b>Guidance ratio</b>: performance peaks at
+            a guidance coefficient of 10, with sharp drops at neighboring values.
+          </p>
+        </div>
+        <div class="columns is-centered">
+          <div class="column is-one-third">
+            <div class="publication-image">
+              <img src="./static/media/eve/ablation_model_size.png" alt="Verifier model scaling ablation"
+                   style="width: 100%; height: auto; background-color: white;">
+            </div>
+            <p class="table-caption">(a) Verifier model scaling.</p>
+          </div>
+          <div class="column is-one-third">
+            <div class="publication-image">
+              <img src="./static/media/eve/ablation_guidance_method.png" alt="Action incorporator design ablation"
+                   style="width: 100%; height: auto; background-color: white;">
+            </div>
+            <p class="table-caption">(b) Action incorporator design.</p>
+          </div>
+          <div class="column is-one-third">
+            <div class="publication-image">
+              <img src="./static/media/eve/ablation_guidance_ratio.png" alt="Guidance ratio ablation"
+                   style="width: 100%; height: auto; background-color: white;">
+            </div>
+            <p class="table-caption">(c) Guidance ratio.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/ Ablations. -->
+
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <!-- Qualitative Results. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Qualitative Results: How EVE Recovers Failed Trajectories</h2>
+      </div>
+    </div>
+
+    <!-- Complementary verifiers. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h3 class="title is-4">Complementary Verifier Capabilities</h3>
+        <div class="content has-text-justified">
+          <p>
+            On a failed <i>Place Apple in Drawer</i> rollout, the base policy &pi;<sub>0</sub> only partially
+            opens the drawer, causing the apple to fall out. EVE detects an MMD spike and intervenes: the
+            <i>Primitive</i> steerer proposes a "Nudge Left" action toward the handle, while the <i>Pivot</i>
+            steerer selects trajectories that maximize outward pulling of the drawer. The averaged feedback
+            guides denoising so the drawer opens fully and the apple is placed successfully &mdash; showing how
+            complementary verifier guidance recovers a failed trajectory.
+          </p>
+        </div>
+        <div class="publication-image">
+          <img src="./static/media/eve/place_apple.png"
+               alt="EVE recovering a failed Place Apple in Drawer trajectory"
+               style="width: 100%; height: auto;">
+        </div>
+      </div>
+    </div>
+    <!--/ Complementary verifiers. -->
+
+    <!-- Robustness via ensembling. -->
+    <div class="columns is-centered has-text-centered" style="margin-top: 2rem;">
+      <div class="column is-full">
+        <h3 class="title is-4">Robustness via Ensembling</h3>
+        <div class="content has-text-justified">
+          <p>
+            On a failed <i>Move Near</i> rollout, the base policy executes a faulty grip and the can tips over.
+            EVE detects an MMD spike during the approach phase. Here the <i>Primitive</i> steerer proposes a
+            corrective "Nudge Left", while the <i>Pivot</i> steerer incorrectly selects an unhelpful trajectory.
+            Because EVE aggregates feedback across verifiers, the averaged signal still yields a small leftward
+            correction that achieves a stable grasp &mdash; illustrating EVE's robustness to imperfect verifier
+            feedback.
+          </p>
+        </div>
+        <div class="publication-image">
+          <img src="./static/media/eve/move_near.png"
+               alt="EVE recovering a failed Move Near trajectory via ensembling"
+               style="width: 100%; height: auto;">
+        </div>
+      </div>
+    </div>
+    <!--/ Robustness via ensembling. -->
+
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{ali2025eve,
+  title={EVE: A Generator-Verifier System for Generative Policies},
+  author={Ali, Yusuf and Patlin, Gryphon and Kothuri, Karthik and Coholich, Jeremiah and Irshad, Muhammad Zubair and Liang, Wuwei and Kira, Zsolt},
+  journal={arXiv preprint arXiv:2512.21430},
+  year={2025},
+  url={https://arxiv.org/abs/2512.21430}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            Website template adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
